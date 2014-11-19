@@ -3,7 +3,10 @@ package coxiella;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 
 /**
  *
@@ -11,11 +14,15 @@ import java.util.HashMap;
  */
 public class Coxiella {
     
+    private final HashMap<String, String> seq_map = new HashMap<>(), fun_map = new HashMap<>();
+    private final HashMap<String, Integer> functionCountMap = new HashMap<>();
+    
     public void extractFasta(String file) throws IOException{
         BufferedReader br = new BufferedReader(new FileReader(file));
         StringBuilder sb = new StringBuilder();
         String line, key, function;
-        HashMap<String, String> seq_map = new HashMap<>(), fun_map = new HashMap<>();
+        
+        Integer i = 0;///////////////////
         line = br.readLine();
         key = line.split("@")[1];
         function = line.split("   ")[1];
@@ -27,6 +34,8 @@ public class Coxiella {
                 key = line.split("@")[1];
                 function = line.split("   ")[1];
                 fun_map.put(key, function);
+                i = functionCountMap.containsKey(function)? functionCountMap.get(function) + 1 : 1;//////////////
+                functionCountMap.put(function, i);//////////////////
             }
             else{
                 sb.append(line);
@@ -34,6 +43,25 @@ public class Coxiella {
         }
         seq_map.put(key, sb.toString());
         br.close();
+        i=0; int j=0;
+        HashMap<Integer, Integer> m = new HashMap<>();
+        for (Map.Entry<String, Integer> entrySet : functionCountMap.entrySet()) {
+            key = entrySet.getKey();
+            Integer value = entrySet.getValue();
+            if(value > 1){
+                i++;
+                System.out.println(key + '\t' + value + '\n');
+                j = m.containsKey(value)? m.get(value) + 1 : 1;
+                m.put(value, j);
+            }
+        }
+        System.out.println(i + " entries");
+        System.out.println("Distribution:\n");
+        for (Map.Entry<Integer, Integer> entrySet : m.entrySet()) {
+            Integer key1 = entrySet.getKey();
+            Integer value = entrySet.getValue();
+            System.out.println(key1 + "\t" + value);
+        }
     }
 
     /**
@@ -43,7 +71,7 @@ public class Coxiella {
     public static void main(String[] args) throws IOException {
         // TODO code application logic here
         Coxiella cox = new Coxiella();
-        cox.extractFasta("/Users/Tobias/Desktop/p3_r57631_Cox_burne.fa");
+        cox.extractFasta("/home/h/harrert/Desktop/p3_r57631_Cox_burne.fa");//"/Users/Tobias/Desktop/p3_r57631_Cox_burne.fa"
     }
     
 }

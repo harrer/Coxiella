@@ -3,9 +3,8 @@ package coxiella;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Arrays;
+import java.io.PrintWriter;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 
 /**
@@ -16,6 +15,22 @@ public class Coxiella {
     
     private final HashMap<String, String> seq_map = new HashMap<>(), fun_map = new HashMap<>();
     private final HashMap<String, Integer> functionCountMap = new HashMap<>();
+    
+    public void trimFastaHeader(String file) throws IOException{
+        BufferedReader br = new BufferedReader(new FileReader(file));
+        StringBuilder sb = new StringBuilder();
+        String line;
+        while((line = br.readLine()) != null){
+            if(line.startsWith(">")){//fasta header
+                sb.append(line.split("@")[1]);
+            }
+            else{//sequence
+                sb.append(line);
+            }
+        }
+        PrintWriter pw = new PrintWriter(file);
+        pw.write(sb.toString());
+    }
     
     public void extractFasta(String file) throws IOException{
         BufferedReader br = new BufferedReader(new FileReader(file));

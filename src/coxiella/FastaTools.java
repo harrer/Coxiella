@@ -3,16 +3,14 @@ package coxiella;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 
 /**
  *
  * @author Tobias
  */
-public class Coxiella {
+public class FastaTools {
     
     private final HashMap<String, String> seq_map = new HashMap<>(), fun_map = new HashMap<>();
     private final HashMap<String, Integer> functionCountMap = new HashMap<>();
@@ -70,7 +68,7 @@ public class Coxiella {
      */
     public static void main(String[] args) throws IOException {
         // TODO code application logic here
-        Coxiella cox = new Coxiella();
+        FastaTools cox = new FastaTools();
         cox.extractFasta("/home/h/harrert/Desktop/p3_r57631_Cox_burne.fa");//"/Users/Tobias/Desktop/p3_r57631_Cox_burne.fa"
     }
     

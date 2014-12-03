@@ -17,7 +17,39 @@ public class BLAST_Processor {
 
     private final HashMap<String, ProteinFunction> functionMap = new HashMap<>();
     private final double threshold = 1e-4;
+    private final HashMap<String, String> equalProteins = new HashMap<>();
+    private final HashMap<String, Boolean> equivProteinExists = new HashMap<>();
     
+    
+    /**
+     * Check if two equal proteins exist in two different proteoms
+     * <p>
+     * Fills two maps with a bool map of all proteins and a map of all corresponding proteins.
+     * @param file The input BLAST file
+     * @throws IOException if file does not exist
+     */
+    public void proteinExists(String file) throws IOException{
+        BufferedReader br = new BufferedReader(new FileReader(file));
+        int t=0, f=0;
+        String line;
+        while((line = br.readLine()) != null){
+            if(!line.startsWith("#")){
+                String[] split = line.split("\t");
+                String[] query = split[0].split("@");
+                String[] subject = split[1].split("@");
+                if(!query[0].equals(subject[0]) && split[2].equals("100.00")){//!split[0].equals(split[1]) && 
+                    equalProteins.put(query[1], subject[1]);
+                    equivProteinExists.put(query[1], true);
+                    t++;
+                }
+                else{
+                    equivProteinExists.put(query[1], false);
+                }
+            }
+        }
+        br.close();
+        System.out.println("True: "+t+" false: "+f);
+    }
     
     /**
      * Process a BLASTp file
@@ -50,6 +82,7 @@ public class BLAST_Processor {
                 }
             }
         }
+        br.close();
     }
     
     /**
@@ -79,7 +112,8 @@ public class BLAST_Processor {
     
     public static void main(String[] args) throws IOException {
         BLAST_Processor bp = new BLAST_Processor();
-        bp.processBLAST("/home/h/harrert/Desktop/Coxiella/BLAST_out/ThreeByThree.tab");
-        bp.printProteinFunction("/home/h/harrert/Desktop/cox.csv");
+        bp.proteinExists("/Users/Tobias/ThreeByThree.csv");
+        //bp.processBLAST("/home/h/harrert/Desktop/Coxiella/BLAST_out/ThreeByThree.tab");
+        //bp.printProteinFunction("/home/h/harrert/Desktop/cox.csv");
     }
 }

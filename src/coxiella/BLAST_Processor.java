@@ -32,7 +32,7 @@ public class BLAST_Processor {
         BufferedReader br = new BufferedReader(new FileReader(file));
         String line;
         boolean skip = false;
-        int t=0,f=0, all=0, sh=0, probe=0;
+        int t=0,f=0, all=0, probe=0;
         while((line = br.readLine()) != null){
             boolean header = line.startsWith("#");
             String[] splt = line.split("\t");
@@ -48,16 +48,16 @@ public class BLAST_Processor {
                 String[] split = line.split("\t");
                 String[] query = split[0].split("@");
                 String[] subject = split[1].split("@");
-                if(!split[2].equals("100.00") && !equivProteinExists.containsKey(query[1])){ //no match
+                if(split[0].equals(split[1]) && !equivProteinExists.containsKey(query[1])){//self hit
+                    equivProteinExists.put(query[1], false);
+                    f++;
+                }
+                else if(!split[2].equals("100.00") && !equivProteinExists.containsKey(query[1])){ //no match
                     equivProteinExists.put(query[1], false);
                     skip = true;
                     f++;
                 }
-                else if(split[0].equals(split[1]) && !equivProteinExists.containsKey(query[1])){//self hit
-                    equivProteinExists.put(query[1], false);
-                    f++;
-                }
-                else if(!query[0].equals(subject[0])){//match found, no self hit
+                else if(!query[0].equals(subject[0]) && split[2].equals("100.00")){//match found, no self hit
                     if(equivProteinExists.containsKey(query[1])){
                         f--;
                     }
@@ -68,14 +68,11 @@ public class BLAST_Processor {
                 }
             }
             else if(header){
-                if(line.startsWith("# PSIBLAST") && (f+t+sh)!=all){
-                    sh++;
-                }
                 skip = false;
             }
         }
         br.close();
-        System.out.println("t: "+t+"\tf: "+f+"\tself hits: "+sh+"\tt+f: "+(t+f)+"\tall: "+all);
+        System.out.println("t: "+t+"\tf: "+f+"\tt+f: "+(t+f)+"\tall: "+all);
         System.out.println("Probe: "+probe);
     }
     
@@ -140,7 +137,7 @@ public class BLAST_Processor {
     
     public static void main(String[] args) throws IOException {
         BLAST_Processor bp = new BLAST_Processor();
-        bp.proteinExists("/home/h/harrert/Desktop/Coxiella/BLAST_out/ThreeByThree.tab");///Users/Tobias/ThreeByThree.csv
+        bp.proteinExists("/Users/Tobias/ThreeByThree.csv");///home/h/harrert/Desktop/Coxiella/BLAST_out/ThreeByThree.tab
         //bp.processBLAST("/home/h/harrert/Desktop/Coxiella/BLAST_out/ThreeByThree.tab");
         //bp.printProteinFunction("/home/h/harrert/Desktop/cox.csv");
     }

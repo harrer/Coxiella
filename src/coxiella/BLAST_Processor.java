@@ -30,25 +30,29 @@ public class BLAST_Processor {
      */
     public void proteinExists(String file) throws IOException{
         BufferedReader br = new BufferedReader(new FileReader(file));
-        int t=0, f=0;
         String line;
+        boolean skip = false;
         while((line = br.readLine()) != null){
-            if(!line.startsWith("#")){
+            boolean header = line.startsWith("#");
+            if(!header && !skip){
                 String[] split = line.split("\t");
                 String[] query = split[0].split("@");
                 String[] subject = split[1].split("@");
-                if(!query[0].equals(subject[0]) && split[2].equals("100.00")){//!split[0].equals(split[1]) && 
+                if(!split[2].equals("100.00")){
+                    equivProteinExists.put(query[1], false);
+                    skip = true;
+                }
+                else if(!query[0].equals(subject[0])){//match found, no self hit
                     equalProteins.put(query[1], subject[1]);
                     equivProteinExists.put(query[1], true);
-                    t++;
+                    skip = true;
                 }
-                else{
-                    equivProteinExists.put(query[1], false);
-                }
+            }
+            else if(header){
+                skip = false;
             }
         }
         br.close();
-        System.out.println("True: "+t+" false: "+f);
     }
     
     /**

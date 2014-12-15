@@ -5,6 +5,8 @@
  */
 package coxiella;
 
+import java.util.HashMap;
+
 /**
  *
  * @author harrert
@@ -12,6 +14,10 @@ package coxiella;
 public class Test {
     
     public static void main(String[] args) {
-        System.out.println(Double.compare(Double.parseDouble("1e-56"), 1e-4));
+        for (int i = 0; i <= 100; i++) {
+            if(i%2 == 1){
+                System.out.println(i+" x "+i+" = "+i*i);
+            }
+        }
     }
 }

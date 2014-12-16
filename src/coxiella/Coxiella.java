@@ -43,7 +43,7 @@ public class Coxiella {
     public static void main(String[] args) throws IOException {
         // TODO code application logic here
         Coxiella cox = new Coxiella();
-        cox.extractFasta("/Users/Tobias/Desktop/p3_r57631_Cox_burne.fa");
+        cox.extractFasta("/home/tobias/Dropbox/UNI/BACHELOR/Sequenzen/RSA_493_NM1/p3_r57631_Cox_burne.fa");//("/Users/Tobias/Desktop/p3_r57631_Cox_burne.fa");
     }
     
 }

@@ -1,2 +1,3 @@
 *.class
 /build/classes/coxiella/
+nbproject/private/

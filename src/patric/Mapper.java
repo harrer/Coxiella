@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -20,12 +21,12 @@ public class Mapper {
     private final HashMap<String, String> patric_refSeq_locus = new HashMap();
     private final HashMap<String, String> figFam_refSeq_locus = new HashMap();
 
-    public Mapper(String path) throws IOException{
-        read_LocusTag("/home/tobias/Desktop/locus_patric_refseq_q177.txt");
-        read_LocusTag("/home/tobias/Desktop/locus_patric_refseq_q154.txt");
-        read_LocusTag("/home/tobias/Desktop/locus_patric_refseq_rsa493.txt");
-        process_FigFam("/home/tobias/Desktop/ProteinFamilyFeatures.txt");
-        toFile(path);
+    public Mapper(String path, String outpath) throws IOException{
+        read_LocusTag(path+"locus_patric_refseq_q177.txt");
+        read_LocusTag(path+"locus_patric_refseq_q154.txt");
+        read_LocusTag(path+"locus_patric_refseq_rsa493.txt");
+        process_FigFam(path+"ProteinFamilyFeatures.txt");
+        toFile(outpath);
     }
     
     private void read_LocusTag(String file) throws IOException{
@@ -68,15 +69,16 @@ public class Mapper {
     }
     
     private void toFile(String path) throws FileNotFoundException{
-        StringBuilder sb = new StringBuilder("FigFam\tQ177\tQ154\tRSA_493\tRefSeq Locus tags\n");
+        StringBuilder sb = new StringBuilder("FigFam\tQ177\tQ154\tRSA_493\tRefSeq Locus tags\tnumber of proteins\n");
         HashSet<String> groups = new HashSet();
         for (Map.Entry<String, String> entrySet : locus_group.entrySet()) {
             String locus = entrySet.getKey();
             String group = entrySet.getValue();
             boolean[] genomes = group_genome.get(group);
             if(!groups.contains(group)){
-                sb.append(group).append('\t').append(genomes[0]? "1":"0").append('\t').append(genomes[1]?"1":"0").append('\t').append(genomes[2]?"1":"0").append('\t').append(figFam_refSeq_locus.getOrDefault(group,"no RefSeq locus mapped")).append('\n');
-                
+                //sb.append(group).append('\t').append(genomes[0]? "1":"0").append('\t').append(genomes[1]?"1":"0").append('\t').append(genomes[2]?"1":"0").append('\t').append(figFam_refSeq_locus.getOrDefault(group,"no RefSeq locus mapped")).append('\n');
+                int length = figFam_refSeq_locus.containsKey(group)? figFam_refSeq_locus.get(group).split(",").length : 0;
+                sb.append(group).append('\t').append(genomes[0]? "1":"0").append(genomes[1]?"1":"0").append(genomes[2]?"1":"0").append('\t').append(figFam_refSeq_locus.getOrDefault(group,"no RefSeq locus mapped")).append('\t').append(length).append('\n');
             }
             groups.add(group);
         }
@@ -86,6 +88,6 @@ public class Mapper {
     }
 
     public static void main(String[] args) throws IOException {
-        Mapper m = new Mapper("/home/tobias/Desktop/figfam_genomes.txt");
+        Mapper m = new Mapper("/home/tobias/Coxiella/","/home/tobias/Desktop/figfam_genomes.txt");
     }
 }

@@ -1,3 +1,3 @@
 *.class
-/build/classes/coxiella/
-nbproject/private/
+/build/classes/coxiella/*
+nbproject/private/*

@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -18,26 +17,13 @@ public class Mapper {
 
     private final HashMap<String, String> locus_group = new HashMap();
     private final HashMap<String, boolean[]> group_genome = new HashMap();
-    private final HashMap<String, String> patric_refSeq_locus = new HashMap();
-    private final HashMap<String, String> figFam_refSeq_locus = new HashMap();
+    private final HashMap<String, String> figFam_locus_493 = new HashMap();//82552
+    private final HashMap<String, String> figFam_locus_177 = new HashMap();//107188
+    private final HashMap<String, String> figFam_locus_154 = new HashMap();//77120
 
     public Mapper(String path, String outpath) throws IOException{
-        read_LocusTag(path+"locus_patric_refseq_q177.txt");
-        read_LocusTag(path+"locus_patric_refseq_q154.txt");
-        read_LocusTag(path+"locus_patric_refseq_rsa493.txt");
         process_FigFam(path+"ProteinFamilyFeatures.txt");
         toFile(outpath);
-    }
-    
-    private void read_LocusTag(String file) throws IOException{
-        BufferedReader br = new BufferedReader(new FileReader(file));
-        String line;
-        br.readLine();
-        while ((line = br.readLine()) != null && !line.equals("")) {
-            String[] split = line.split("\t");
-            patric_refSeq_locus.put(split[2], split[3]);
-        }
-        br.close();
     }
     
     private void process_FigFam(String file) throws IOException {
@@ -47,12 +33,24 @@ public class Mapper {
         while ((line = br.readLine()) != null && !line.equals("")) {
             String[] split = line.split("\t");//0: Group, 1:Genome , 3:Locus
             locus_group.put(split[3], split[0]);
-            if(patric_refSeq_locus.containsKey(split[3])){
-                if(figFam_refSeq_locus.containsKey(split[0])){
-                    figFam_refSeq_locus.put(split[0], figFam_refSeq_locus.get(split[0])+","+patric_refSeq_locus.get(split[3]));
+            if (split[3].contains("82552")) {//RSA_493
+                if (figFam_locus_493.containsKey(split[0])) {
+                    figFam_locus_493.put(split[0], figFam_locus_493.get(split[0]) + "," + split[3].substring(9, split[3].length()));//.split("_")[1] entfernt redundanten Patric_Id header: 82552_0123 -> 0123
+                } else {
+                    figFam_locus_493.put(split[0], split[3].substring(9, split[3].length()));
                 }
-                else{
-                    figFam_refSeq_locus.put(split[0], patric_refSeq_locus.get(split[3]));
+            } else if(split[3].contains("107188")) {//Q177
+                if (figFam_locus_177.containsKey(split[0])) {
+                    figFam_locus_177.put(split[0], figFam_locus_177.get(split[0]) + "," + split[3].substring(9, split[3].length()));
+                } else {
+                    figFam_locus_177.put(split[0], split[3].substring(9, split[3].length()));
+                }
+            }
+            else if(split[3].contains("77120")){//Q154
+                if (figFam_locus_154.containsKey(split[0])) {
+                    figFam_locus_154.put(split[0], figFam_locus_154.get(split[0]) + "," + split[3].substring(9, split[3].length()));
+                } else {
+                    figFam_locus_154.put(split[0], split[3].substring(9, split[3].length()));
                 }
             }
             boolean[] genomes = (group_genome.containsKey(split[0])) ? group_genome.get(split[0]) : new boolean[3];//bit vector genomes: 0: Q177, 1: Q154, 2: RSA 493
@@ -69,16 +67,17 @@ public class Mapper {
     }
     
     private void toFile(String path) throws FileNotFoundException{
-        StringBuilder sb = new StringBuilder("FigFam\tQ177\tQ154\tRSA_493\tRefSeq Locus tags\tnumber of proteins\n");
+        StringBuilder sb = new StringBuilder("FigFam\tQ177|Q154|RSA_493\tPatric Locus tags Q177 (107188_...)\tQ154 (77120_...)\tRSA_493 (82552_...)\tnumber of proteins\tortholog\n");
         HashSet<String> groups = new HashSet();
         for (Map.Entry<String, String> entrySet : locus_group.entrySet()) {
-            String locus = entrySet.getKey();
             String group = entrySet.getValue();
             boolean[] genomes = group_genome.get(group);
             if(!groups.contains(group)){
                 //sb.append(group).append('\t').append(genomes[0]? "1":"0").append('\t').append(genomes[1]?"1":"0").append('\t').append(genomes[2]?"1":"0").append('\t').append(figFam_refSeq_locus.getOrDefault(group,"no RefSeq locus mapped")).append('\n');
-                int length = figFam_refSeq_locus.containsKey(group)? figFam_refSeq_locus.get(group).split(",").length : 0;
-                sb.append(group).append('\t').append(genomes[0]? "1":"0").append(genomes[1]?"1":"0").append(genomes[2]?"1":"0").append('\t').append(figFam_refSeq_locus.getOrDefault(group,"no RefSeq locus mapped")).append('\t').append(length).append('\n');
+                int length = (figFam_locus_154.containsKey(group)?figFam_locus_154.get(group).split(",").length : 0) + (figFam_locus_177.containsKey(group)?figFam_locus_177.get(group).split(",").length:0) + (figFam_locus_493.containsKey(group)?figFam_locus_493.get(group).split(",").length : 0);
+                sb.append(group).append('\t').append(genomes[0]? "1":"0").append(genomes[1]?"1":"0").append(genomes[2]?"1":"0").append('\t').append(figFam_locus_177.getOrDefault(group,"---")).append('\t').append(figFam_locus_154.getOrDefault(group,"---")).append('\t').append(figFam_locus_493.getOrDefault(group,"---")).append('\t').append(length);
+                String ortholog = (length==3 && (genomes[0] && genomes[1] && genomes[2]))? "\t1\n": "\n";
+                sb.append(ortholog);
             }
             groups.add(group);
         }
@@ -88,6 +87,6 @@ public class Mapper {
     }
 
     public static void main(String[] args) throws IOException {
-        Mapper m = new Mapper("/home/tobias/Coxiella/","/home/tobias/Desktop/figfam_genomes.txt");
+        Mapper m = new Mapper("/home/h/harrert/Coxiella/","/home/h/harrert/Desktop/figfam_genomes.csv");
     }
 }

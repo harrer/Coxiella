@@ -74,10 +74,16 @@ public class Mapper {
             boolean[] genomes = group_genome.get(group);
             if(!groups.contains(group)){
                 //sb.append(group).append('\t').append(genomes[0]? "1":"0").append('\t').append(genomes[1]?"1":"0").append('\t').append(genomes[2]?"1":"0").append('\t').append(figFam_refSeq_locus.getOrDefault(group,"no RefSeq locus mapped")).append('\n');
-                int length = (figFam_locus_154.containsKey(group)?figFam_locus_154.get(group).split(",").length : 0) + (figFam_locus_177.containsKey(group)?figFam_locus_177.get(group).split(",").length:0) + (figFam_locus_493.containsKey(group)?figFam_locus_493.get(group).split(",").length : 0);
-                sb.append(group).append('\t').append(genomes[0]? "1":"0").append(genomes[1]?"1":"0").append(genomes[2]?"1":"0").append('\t').append(figFam_locus_177.getOrDefault(group,"---")).append('\t').append(figFam_locus_154.getOrDefault(group,"---")).append('\t').append(figFam_locus_493.getOrDefault(group,"---")).append('\t').append(length);
-                String ortholog = (length==3 && (genomes[0] && genomes[1] && genomes[2]))? "\t1\n": "\n";
-                sb.append(ortholog);
+                int l_154 = figFam_locus_154.containsKey(group)?figFam_locus_154.get(group).split(",").length : 0;
+                int l_177 = figFam_locus_177.containsKey(group)?figFam_locus_177.get(group).split(",").length : 0;
+                int l_493 = figFam_locus_493.containsKey(group)?figFam_locus_493.get(group).split(",").length : 0;
+                int length = l_154 + l_177 + l_493;
+                sb.append(group).append('\t').append(genomes[0]? "1":"0").append(genomes[1]?"1":"0").append(genomes[2]?"1":"0").append('\t').append(figFam_locus_177.getOrDefault(group,"---")).append('\t').append(figFam_locus_154.getOrDefault(group,"---")).append('\t').append(figFam_locus_493.getOrDefault(group,"---")).append('\t').append(length).append('\t');
+                if (genomes[0] && genomes[1] && genomes[2]) {
+                    int ortholog = Math.min(Math.min(l_154, l_177), l_493);
+                    sb.append(ortholog);
+                }
+                sb.append("\t\n");
             }
             groups.add(group);
         }

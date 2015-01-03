@@ -20,6 +20,7 @@ public class Mapper {
     private final HashMap<String, String> figFam_locus_493 = new HashMap();//82552
     private final HashMap<String, String> figFam_locus_177 = new HashMap();//107188
     private final HashMap<String, String> figFam_locus_154 = new HashMap();//77120
+    private final HashMap<String, String> figFam_function = new HashMap();
 
     public Mapper(String path, String outpath) throws IOException{
         process_FigFam(path+"ProteinFamilyFeatures.txt");
@@ -33,6 +34,7 @@ public class Mapper {
         while ((line = br.readLine()) != null && !line.equals("")) {
             String[] split = line.split("\t");//0: Group, 1:Genome , 3:Locus
             locus_group.put(split[3], split[0]);
+            figFam_function.putIfAbsent(split[0], split[10]);
             if (split[3].contains("82552")) {//RSA_493
                 if (figFam_locus_493.containsKey(split[0])) {
                     figFam_locus_493.put(split[0], figFam_locus_493.get(split[0]) + "," + split[3].substring(9, split[3].length()));//.split("_")[1] entfernt redundanten Patric_Id header: 82552_0123 -> 0123
@@ -67,7 +69,7 @@ public class Mapper {
     }
     
     private void toFile(String path) throws FileNotFoundException{
-        StringBuilder sb = new StringBuilder("FigFam\tQ177|Q154|RSA_493\tPatric Locus tags Q177 (107188_...)\tQ154 (77120_...)\tRSA_493 (82552_...)\tnumber of proteins\tortholog\n");
+        StringBuilder sb = new StringBuilder("FigFam\tQ177|Q154|RSA_493\tPatric Locus tags Q177 (107188_...)\tQ154 (77120_...)\tRSA_493 (82552_...)\tnumber of proteins\tortholog\tfunction\n");
         HashSet<String> groups = new HashSet();
         for (Map.Entry<String, String> entrySet : locus_group.entrySet()) {
             String group = entrySet.getValue();
@@ -81,11 +83,26 @@ public class Mapper {
                 if(genomes[0] && genomes[1] && genomes[2]){
                     int orthologs = Math.min(Math.min(l_154, l_177), l_493);
                     if(length%orthologs != 0){
-                        sb.append(group).append('\t').append(genomes[0]? "1":"0").append(genomes[1]?"1":"0").append(genomes[2]?"1":"0").append('\t').append(figFam_locus_177.getOrDefault(group,"---")).append('\t').append(figFam_locus_154.getOrDefault(group,"---")).append('\t').append(figFam_locus_493.getOrDefault(group,"---")).append('\t').append(length).append('\t').append(orthologs).append("\t\n");
+                        sb.append(group).append('\t').append(genomes[0]? "1":"0").append(genomes[1]?"1":"0").append(genomes[2]?"1":"0").append('\t').append(figFam_locus_177.getOrDefault(group,"---")).append('\t').append(figFam_locus_154.getOrDefault(group,"---")).append('\t').append(figFam_locus_493.getOrDefault(group,"---")).append('\t').append(length).append('\t').append(orthologs).append('\t').append('\n');
+                    }
+                }
+                else if(!genomes[0] && genomes[1] && genomes[2]){
+                    if(l_154 != l_493){
+                        sb.append(group).append('\t').append(genomes[0]? "1":"0").append(genomes[1]?"1":"0").append(genomes[2]?"1":"0").append('\t').append(figFam_locus_177.getOrDefault(group,"---")).append('\t').append(figFam_locus_154.getOrDefault(group,"---")).append('\t').append(figFam_locus_493.getOrDefault(group,"---")).append('\t').append(length).append('\t').append(Math.min(l_154,l_493)).append('\t').append('\n');
+                    }
+                }
+                else if(genomes[0] && !genomes[1] && genomes[2]){
+                    if(l_177 != l_493){
+                        sb.append(group).append('\t').append(genomes[0]? "1":"0").append(genomes[1]?"1":"0").append(genomes[2]?"1":"0").append('\t').append(figFam_locus_177.getOrDefault(group,"---")).append('\t').append(figFam_locus_154.getOrDefault(group,"---")).append('\t').append(figFam_locus_493.getOrDefault(group,"---")).append('\t').append(length).append('\t').append(Math.min(l_177,l_493)).append('\t').append('\n');
+                    }
+                }
+                else if(genomes[0] && genomes[1] && !genomes[2]){
+                    if(l_154 != l_177){
+                        sb.append(group).append('\t').append(genomes[0]? "1":"0").append(genomes[1]?"1":"0").append(genomes[2]?"1":"0").append('\t').append(figFam_locus_177.getOrDefault(group,"---")).append('\t').append(figFam_locus_154.getOrDefault(group,"---")).append('\t').append(figFam_locus_493.getOrDefault(group,"---")).append('\t').append(length).append('\t').append(Math.min(l_154,l_177)).append('\t').append('\n');
                     }
                 }
                 else{
-                    sb.append(group).append('\t').append(genomes[0]? "1":"0").append(genomes[1]?"1":"0").append(genomes[2]?"1":"0").append('\t').append(figFam_locus_177.getOrDefault(group,"---")).append('\t').append(figFam_locus_154.getOrDefault(group,"---")).append('\t').append(figFam_locus_493.getOrDefault(group,"---")).append('\t').append(length).append('\t').append("\t\n");
+                    sb.append(group).append('\t').append(genomes[0]? "1":"0").append(genomes[1]?"1":"0").append(genomes[2]?"1":"0").append('\t').append(figFam_locus_177.getOrDefault(group,"---")).append('\t').append(figFam_locus_154.getOrDefault(group,"---")).append('\t').append(figFam_locus_493.getOrDefault(group,"---")).append('\t').append(length).append('\t').append('\n');
                 }                
             }
             groups.add(group);

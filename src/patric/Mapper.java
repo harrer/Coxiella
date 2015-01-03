@@ -78,12 +78,15 @@ public class Mapper {
                 int l_177 = figFam_locus_177.containsKey(group)?figFam_locus_177.get(group).split(",").length : 0;
                 int l_493 = figFam_locus_493.containsKey(group)?figFam_locus_493.get(group).split(",").length : 0;
                 int length = l_154 + l_177 + l_493;
-                sb.append(group).append('\t').append(genomes[0]? "1":"0").append(genomes[1]?"1":"0").append(genomes[2]?"1":"0").append('\t').append(figFam_locus_177.getOrDefault(group,"---")).append('\t').append(figFam_locus_154.getOrDefault(group,"---")).append('\t').append(figFam_locus_493.getOrDefault(group,"---")).append('\t').append(length).append('\t');
-                if (genomes[0] && genomes[1] && genomes[2]) {
-                    int ortholog = Math.min(Math.min(l_154, l_177), l_493);
-                    sb.append(ortholog);
+                if(genomes[0] && genomes[1] && genomes[2]){
+                    int orthologs = Math.min(Math.min(l_154, l_177), l_493);
+                    if(length%orthologs != 0){
+                        sb.append(group).append('\t').append(genomes[0]? "1":"0").append(genomes[1]?"1":"0").append(genomes[2]?"1":"0").append('\t').append(figFam_locus_177.getOrDefault(group,"---")).append('\t').append(figFam_locus_154.getOrDefault(group,"---")).append('\t').append(figFam_locus_493.getOrDefault(group,"---")).append('\t').append(length).append('\t').append(orthologs).append("\t\n");
+                    }
                 }
-                sb.append("\t\n");
+                else{
+                    sb.append(group).append('\t').append(genomes[0]? "1":"0").append(genomes[1]?"1":"0").append(genomes[2]?"1":"0").append('\t').append(figFam_locus_177.getOrDefault(group,"---")).append('\t').append(figFam_locus_154.getOrDefault(group,"---")).append('\t').append(figFam_locus_493.getOrDefault(group,"---")).append('\t').append(length).append('\t').append("\t\n");
+                }                
             }
             groups.add(group);
         }
@@ -93,6 +96,7 @@ public class Mapper {
     }
 
     public static void main(String[] args) throws IOException {
-        Mapper m = new Mapper("/home/h/harrert/Coxiella/","/home/h/harrert/Desktop/figfam_genomes.csv");
+        //Mapper m = new Mapper("/home/h/harrert/Coxiella/","/home/h/harrert/Desktop/figfam_genomes.csv");
+        new Mapper("/home/tobias/Dropbox/UNI/BACHELOR/Daten_Ergebnisse/","/home/tobias/Desktop/figfam_genomes.csv");
     }
 }

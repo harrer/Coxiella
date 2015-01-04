@@ -22,11 +22,11 @@ public class Mapper {
     private final HashMap<String, String> figFam_locus_154 = new HashMap();//77120
     private final HashMap<String, String> figFam_function = new HashMap();
 
-    public Mapper(String path, String outpath) throws IOException{
-        process_FigFam(path+"ProteinFamilyFeatures.txt");
+    public Mapper(String path, String outpath) throws IOException {
+        process_FigFam(path + "ProteinFamilyFeatures.txt");
         toFile(outpath);
     }
-    
+
     private void process_FigFam(String file) throws IOException {
         BufferedReader br = new BufferedReader(new FileReader(file));
         String line;
@@ -41,14 +41,13 @@ public class Mapper {
                 } else {
                     figFam_locus_493.put(split[0], split[3].substring(9, split[3].length()));
                 }
-            } else if(split[3].contains("107188")) {//Q177
+            } else if (split[3].contains("107188")) {//Q177
                 if (figFam_locus_177.containsKey(split[0])) {
                     figFam_locus_177.put(split[0], figFam_locus_177.get(split[0]) + "," + split[3].substring(9, split[3].length()));
                 } else {
                     figFam_locus_177.put(split[0], split[3].substring(9, split[3].length()));
                 }
-            }
-            else if(split[3].contains("77120")){//Q154
+            } else if (split[3].contains("77120")) {//Q154
                 if (figFam_locus_154.containsKey(split[0])) {
                     figFam_locus_154.put(split[0], figFam_locus_154.get(split[0]) + "," + split[3].substring(9, split[3].length()));
                 } else {
@@ -67,43 +66,40 @@ public class Mapper {
         }
         br.close();
     }
-    
-    private void toFile(String path) throws FileNotFoundException{
+
+    private void toFile(String path) throws FileNotFoundException {
         StringBuilder sb = new StringBuilder("FigFam\tQ177|Q154|RSA_493\tPatric Locus tags Q177 (107188_...)\tQ154 (77120_...)\tRSA_493 (82552_...)\tnumber of proteins\tortholog\tfunction\n");
         HashSet<String> groups = new HashSet();
         for (Map.Entry<String, String> entrySet : locus_group.entrySet()) {
             String group = entrySet.getValue();
             boolean[] genomes = group_genome.get(group);
-            if(!groups.contains(group)){
+            if (!groups.contains(group)) {
                 //sb.append(group).append('\t').append(genomes[0]? "1":"0").append('\t').append(genomes[1]?"1":"0").append('\t').append(genomes[2]?"1":"0").append('\t').append(figFam_refSeq_locus.getOrDefault(group,"no RefSeq locus mapped")).append('\n');
-                int l_154 = figFam_locus_154.containsKey(group)?figFam_locus_154.get(group).split(",").length : 0;
-                int l_177 = figFam_locus_177.containsKey(group)?figFam_locus_177.get(group).split(",").length : 0;
-                int l_493 = figFam_locus_493.containsKey(group)?figFam_locus_493.get(group).split(",").length : 0;
+                int l_154 = figFam_locus_154.containsKey(group) ? figFam_locus_154.get(group).split(",").length : 0;
+                int l_177 = figFam_locus_177.containsKey(group) ? figFam_locus_177.get(group).split(",").length : 0;
+                int l_493 = figFam_locus_493.containsKey(group) ? figFam_locus_493.get(group).split(",").length : 0;
                 int length = l_154 + l_177 + l_493;
-                if(genomes[0] && genomes[1] && genomes[2]){
+                String function = figFam_function.get(group).contains("ypothetical protein") ? "---" : figFam_function.get(group);
+                if (genomes[0] && genomes[1] && genomes[2]) {
                     int orthologs = Math.min(Math.min(l_154, l_177), l_493);
-                    if(length%orthologs != 0){
-                        sb.append(group).append('\t').append(genomes[0]? "1":"0").append(genomes[1]?"1":"0").append(genomes[2]?"1":"0").append('\t').append(figFam_locus_177.getOrDefault(group,"---")).append('\t').append(figFam_locus_154.getOrDefault(group,"---")).append('\t').append(figFam_locus_493.getOrDefault(group,"---")).append('\t').append(length).append('\t').append(orthologs).append('\t').append('\n');
+                    if (length % orthologs != 0) {
+                        sb.append(group).append('\t').append(genomes[0] ? "1" : "0").append(genomes[1] ? "1" : "0").append(genomes[2] ? "1" : "0").append('\t').append(figFam_locus_177.getOrDefault(group, "---")).append('\t').append(figFam_locus_154.getOrDefault(group, "---")).append('\t').append(figFam_locus_493.getOrDefault(group, "---")).append('\t').append(length).append(" (").append(l_177).append("|").append(l_154).append("|").append(l_493).append(")").append('\t').append(orthologs).append('\t').append(function).append('\n');
                     }
-                }
-                else if(!genomes[0] && genomes[1] && genomes[2]){
-                    if(l_154 != l_493){
-                        sb.append(group).append('\t').append(genomes[0]? "1":"0").append(genomes[1]?"1":"0").append(genomes[2]?"1":"0").append('\t').append(figFam_locus_177.getOrDefault(group,"---")).append('\t').append(figFam_locus_154.getOrDefault(group,"---")).append('\t').append(figFam_locus_493.getOrDefault(group,"---")).append('\t').append(length).append('\t').append(Math.min(l_154,l_493)).append('\t').append('\n');
+                } else if (!genomes[0] && genomes[1] && genomes[2]) {
+                    if (l_154 != l_493) {
+                        sb.append(group).append('\t').append(genomes[0] ? "1" : "0").append(genomes[1] ? "1" : "0").append(genomes[2] ? "1" : "0").append('\t').append(figFam_locus_177.getOrDefault(group, "---")).append('\t').append(figFam_locus_154.getOrDefault(group, "---")).append('\t').append(figFam_locus_493.getOrDefault(group, "---")).append('\t').append(length).append(" (").append(l_177).append("|").append(l_154).append("|").append(l_493).append(")").append('\t').append(Math.min(l_154, l_493)).append('\t').append(function).append('\n');
                     }
-                }
-                else if(genomes[0] && !genomes[1] && genomes[2]){
-                    if(l_177 != l_493){
-                        sb.append(group).append('\t').append(genomes[0]? "1":"0").append(genomes[1]?"1":"0").append(genomes[2]?"1":"0").append('\t').append(figFam_locus_177.getOrDefault(group,"---")).append('\t').append(figFam_locus_154.getOrDefault(group,"---")).append('\t').append(figFam_locus_493.getOrDefault(group,"---")).append('\t').append(length).append('\t').append(Math.min(l_177,l_493)).append('\t').append('\n');
+                } else if (genomes[0] && !genomes[1] && genomes[2]) {
+                    if (l_177 != l_493) {
+                        sb.append(group).append('\t').append(genomes[0] ? "1" : "0").append(genomes[1] ? "1" : "0").append(genomes[2] ? "1" : "0").append('\t').append(figFam_locus_177.getOrDefault(group, "---")).append('\t').append(figFam_locus_154.getOrDefault(group, "---")).append('\t').append(figFam_locus_493.getOrDefault(group, "---")).append('\t').append(length).append(" (").append(l_177).append("|").append(l_154).append("|").append(l_493).append(")").append('\t').append(Math.min(l_177, l_493)).append('\t').append(function).append('\n');
                     }
-                }
-                else if(genomes[0] && genomes[1] && !genomes[2]){
-                    if(l_154 != l_177){
-                        sb.append(group).append('\t').append(genomes[0]? "1":"0").append(genomes[1]?"1":"0").append(genomes[2]?"1":"0").append('\t').append(figFam_locus_177.getOrDefault(group,"---")).append('\t').append(figFam_locus_154.getOrDefault(group,"---")).append('\t').append(figFam_locus_493.getOrDefault(group,"---")).append('\t').append(length).append('\t').append(Math.min(l_154,l_177)).append('\t').append('\n');
+                } else if (genomes[0] && genomes[1] && !genomes[2]) {
+                    if (l_154 != l_177) {
+                        sb.append(group).append('\t').append(genomes[0] ? "1" : "0").append(genomes[1] ? "1" : "0").append(genomes[2] ? "1" : "0").append('\t').append(figFam_locus_177.getOrDefault(group, "---")).append('\t').append(figFam_locus_154.getOrDefault(group, "---")).append('\t').append(figFam_locus_493.getOrDefault(group, "---")).append('\t').append(length).append(" (").append(l_177).append("|").append(l_154).append("|").append(l_493).append(")").append('\t').append(Math.min(l_154, l_177)).append('\t').append(function).append('\n');
                     }
+                } else {
+                    sb.append(group).append('\t').append(genomes[0] ? "1" : "0").append(genomes[1] ? "1" : "0").append(genomes[2] ? "1" : "0").append('\t').append(figFam_locus_177.getOrDefault(group, "---")).append('\t').append(figFam_locus_154.getOrDefault(group, "---")).append('\t').append(figFam_locus_493.getOrDefault(group, "---")).append('\t').append(length).append(" (").append(l_177).append("|").append(l_154).append("|").append(l_493).append(")").append("\t\t").append(function).append('\n');
                 }
-                else{
-                    sb.append(group).append('\t').append(genomes[0]? "1":"0").append(genomes[1]?"1":"0").append(genomes[2]?"1":"0").append('\t').append(figFam_locus_177.getOrDefault(group,"---")).append('\t').append(figFam_locus_154.getOrDefault(group,"---")).append('\t').append(figFam_locus_493.getOrDefault(group,"---")).append('\t').append(length).append('\t').append('\n');
-                }                
             }
             groups.add(group);
         }
@@ -114,6 +110,6 @@ public class Mapper {
 
     public static void main(String[] args) throws IOException {
         //Mapper m = new Mapper("/home/h/harrert/Coxiella/","/home/h/harrert/Desktop/figfam_genomes.csv");
-        new Mapper("/home/tobias/Dropbox/UNI/BACHELOR/Daten_Ergebnisse/","/home/tobias/Desktop/figfam_genomes.csv");
+        new Mapper("/home/tobias/Dropbox/UNI/BACHELOR/Daten_Ergebnisse/", "/home/tobias/Desktop/figfam_genomes.csv");
     }
 }

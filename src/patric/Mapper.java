@@ -91,32 +91,32 @@ public class Mapper {
                         sb.append(group).append('\t').append(genomes[0] ? "1" : "0").append(genomes[1] ? "1" : "0").append(genomes[2] ? "1" : "0").append('\t').append(figFam_locus_177.getOrDefault(group, "---")).append('\t').append(figFam_locus_154.getOrDefault(group, "---")).append('\t').append(figFam_locus_493.getOrDefault(group, "---")).append('\t').append(length).append(" (").append(l_177).append("|").append(l_154).append("|").append(l_493).append(")").append('\t').append(orthologs).append('\t').append(function).append('\n');
                     }
                 } else if (!genomes[0] && genomes[1] && genomes[2]) {
-                    if (ommit) {
-                        if (l_154 != l_493) {
-                            sb.append(group).append('\t').append(genomes[0] ? "1" : "0").append(genomes[1] ? "1" : "0").append(genomes[2] ? "1" : "0").append('\t').append(figFam_locus_177.getOrDefault(group, "---")).append('\t').append(figFam_locus_154.getOrDefault(group, "---")).append('\t').append(figFam_locus_493.getOrDefault(group, "---")).append('\t').append(length).append(" (").append(l_177).append("|").append(l_154).append("|").append(l_493).append(")").append('\t').append(Math.min(l_154, l_493)).append('\t').append(function).append('\n');
-                        }
+                    /*if (ommit) {
+                    if (l_154 != l_493) {
+                    sb.append(group).append('\t').append(genomes[0] ? "1" : "0").append(genomes[1] ? "1" : "0").append(genomes[2] ? "1" : "0").append('\t').append(figFam_locus_177.getOrDefault(group, "---")).append('\t').append(figFam_locus_154.getOrDefault(group, "---")).append('\t').append(figFam_locus_493.getOrDefault(group, "---")).append('\t').append(length).append(" (").append(l_177).append("|").append(l_154).append("|").append(l_493).append(")").append('\t').append(Math.min(l_154, l_493)).append('\t').append(function).append('\n');
                     }
-                    else{
+                    }
+                    else{*/
                         sb.append(group).append('\t').append(genomes[0] ? "1" : "0").append(genomes[1] ? "1" : "0").append(genomes[2] ? "1" : "0").append('\t').append(figFam_locus_177.getOrDefault(group, "---")).append('\t').append(figFam_locus_154.getOrDefault(group, "---")).append('\t').append(figFam_locus_493.getOrDefault(group, "---")).append('\t').append(length).append(" (").append(l_177).append("|").append(l_154).append("|").append(l_493).append(")").append('\t').append(Math.min(l_154, l_493)).append('\t').append(function).append('\n');
-                    }
+              //      }
                 } else if (genomes[0] && !genomes[1] && genomes[2]) {
-                    if (ommit) {
-                        if (l_177 != l_493) {
-                            sb.append(group).append('\t').append(genomes[0] ? "1" : "0").append(genomes[1] ? "1" : "0").append(genomes[2] ? "1" : "0").append('\t').append(figFam_locus_177.getOrDefault(group, "---")).append('\t').append(figFam_locus_154.getOrDefault(group, "---")).append('\t').append(figFam_locus_493.getOrDefault(group, "---")).append('\t').append(length).append(" (").append(l_177).append("|").append(l_154).append("|").append(l_493).append(")").append('\t').append(Math.min(l_177, l_493)).append('\t').append(function).append('\n');
-                        }
+                    /*if (ommit) {
+                    if (l_177 != l_493) {
+                    sb.append(group).append('\t').append(genomes[0] ? "1" : "0").append(genomes[1] ? "1" : "0").append(genomes[2] ? "1" : "0").append('\t').append(figFam_locus_177.getOrDefault(group, "---")).append('\t').append(figFam_locus_154.getOrDefault(group, "---")).append('\t').append(figFam_locus_493.getOrDefault(group, "---")).append('\t').append(length).append(" (").append(l_177).append("|").append(l_154).append("|").append(l_493).append(")").append('\t').append(Math.min(l_177, l_493)).append('\t').append(function).append('\n');
                     }
-                    else{
+                    }
+                    else{*/
                         sb.append(group).append('\t').append(genomes[0] ? "1" : "0").append(genomes[1] ? "1" : "0").append(genomes[2] ? "1" : "0").append('\t').append(figFam_locus_177.getOrDefault(group, "---")).append('\t').append(figFam_locus_154.getOrDefault(group, "---")).append('\t').append(figFam_locus_493.getOrDefault(group, "---")).append('\t').append(length).append(" (").append(l_177).append("|").append(l_154).append("|").append(l_493).append(")").append('\t').append(Math.min(l_177, l_493)).append('\t').append(function).append('\n');
-                    }
+                  //  }
                 } else if (genomes[0] && genomes[1] && !genomes[2]) {
-                    if (ommit) {
-                        if (l_154 != l_177) {
-                            sb.append(group).append('\t').append(genomes[0] ? "1" : "0").append(genomes[1] ? "1" : "0").append(genomes[2] ? "1" : "0").append('\t').append(figFam_locus_177.getOrDefault(group, "---")).append('\t').append(figFam_locus_154.getOrDefault(group, "---")).append('\t').append(figFam_locus_493.getOrDefault(group, "---")).append('\t').append(length).append(" (").append(l_177).append("|").append(l_154).append("|").append(l_493).append(")").append('\t').append(Math.min(l_154, l_177)).append('\t').append(function).append('\n');
-                        }
+                    /*if (ommit) {
+                    if (l_154 != l_177) {
+                    sb.append(group).append('\t').append(genomes[0] ? "1" : "0").append(genomes[1] ? "1" : "0").append(genomes[2] ? "1" : "0").append('\t').append(figFam_locus_177.getOrDefault(group, "---")).append('\t').append(figFam_locus_154.getOrDefault(group, "---")).append('\t').append(figFam_locus_493.getOrDefault(group, "---")).append('\t').append(length).append(" (").append(l_177).append("|").append(l_154).append("|").append(l_493).append(")").append('\t').append(Math.min(l_154, l_177)).append('\t').append(function).append('\n');
                     }
-                    else{
+                    }
+                    else{*/
                         sb.append(group).append('\t').append(genomes[0] ? "1" : "0").append(genomes[1] ? "1" : "0").append(genomes[2] ? "1" : "0").append('\t').append(figFam_locus_177.getOrDefault(group, "---")).append('\t').append(figFam_locus_154.getOrDefault(group, "---")).append('\t').append(figFam_locus_493.getOrDefault(group, "---")).append('\t').append(length).append(" (").append(l_177).append("|").append(l_154).append("|").append(l_493).append(")").append('\t').append(Math.min(l_154, l_177)).append('\t').append(function).append('\n');
-                    }
+             //       }
                 } else {
                     sb.append(group).append('\t').append(genomes[0] ? "1" : "0").append(genomes[1] ? "1" : "0").append(genomes[2] ? "1" : "0").append('\t').append(figFam_locus_177.getOrDefault(group, "---")).append('\t').append(figFam_locus_154.getOrDefault(group, "---")).append('\t').append(figFam_locus_493.getOrDefault(group, "---")).append('\t').append(length).append(" (").append(l_177).append("|").append(l_154).append("|").append(l_493).append(")").append("\t\t").append(function).append('\n');
                 }

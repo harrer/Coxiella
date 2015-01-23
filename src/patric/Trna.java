@@ -20,6 +20,7 @@ public class Trna {
     private final HashMap<String, HashSet<String>> aa_tRNA = new HashMap();
     private final HashMap<Character, Character> codon_pairs = new HashMap();
     private final HashMap<String, Float> codon_usage = new HashMap();
+    private final HashSet<String> start_codons = new HashSet(Arrays.asList(new String[]{"UUG","CUG","AUU","AUC","AUA","AUG","GUG"}));
 
     public Trna() {
         initCodons();
@@ -96,7 +97,7 @@ public class Trna {
                 sb.append(key).append(", ");
             }
         }
-        sb.append("\ncodons for existing amino acids\tmissing(usage)\tpresent(usage):\n");
+        sb.append("\ncodons for existing amino acids\tmissing(usage)\tpresent(usage):\t ratio\n");
         for (Map.Entry<String, HashSet<String>> entrySet : code_table.entrySet()) {
             String key = entrySet.getKey();
             HashSet<String> v = entrySet.getValue();
@@ -107,14 +108,19 @@ public class Trna {
                 present.retainAll(aa_tRNA.get(key));
                 if (v.size() > 0) {
                     sb.append(key).append('\t');
+                    float sum_missing = 0, sum_present = 0;
                     for (String missing_codon : missing) {
-                        sb.append(missing_codon).append('(').append(codon_usage.get(missing_codon)).append("), ");
+                        String codon = start_codons.contains(missing_codon)? missing_codon : missing_codon.toLowerCase();
+                        sb.append(codon).append('(').append(codon_usage.get(missing_codon)).append("), ");
+                        sum_missing += codon_usage.get(missing_codon);
                     }
                     sb.append('\t');
                     for (String present_codon : present) {
-                        sb.append(present_codon).append('(').append(codon_usage.get(present_codon)).append("), ");
+                        String codon = start_codons.contains(present_codon)? present_codon : present_codon.toLowerCase();
+                        sb.append(codon).append('(').append(codon_usage.get(present_codon)).append("), ");
+                        sum_present += codon_usage.get(present_codon);
                     }
-                    sb.append('\n');
+                    sb.append('\t').append(sum_missing/sum_present).append('\n');
                 }
             }
         }
@@ -125,8 +131,9 @@ public class Trna {
     }
 
     public static void main(String[] args) throws IOException {
-        Trna t_177 = new Trna("/home/tobias/Coxiella/tRNA/", Strain.Q177);
-        Trna t_154 = new Trna("/home/tobias/Coxiella/tRNA/", Strain.Q154);
-        Trna t_493 = new Trna("/home/tobias/Coxiella/tRNA/", Strain.rsa493);
+        String path = "/home/h/harrert/Dropbox/UNI/BACHELOR/Daten_Ergebnisse/tRNA/"; //laptop: "/home/tobias/Coxiella/tRNA/"
+        Trna t_177 = new Trna(path, Strain.Q177);
+        Trna t_154 = new Trna(path, Strain.Q154);
+        Trna t_493 = new Trna(path, Strain.rsa493);
     }
 }

@@ -55,10 +55,12 @@ public class Mapper {
                     figFam_locus_493.put(split[0], patric_refseq.getOrDefault(split[3], split[3]));
                 }
             } else if (split[3].contains("107188")) {//Q177
-                if (figFam_locus_177.containsKey(split[0])) {
-                    figFam_locus_177.put(split[0], figFam_locus_177.get(split[0]) + "," + patric_refseq.getOrDefault(split[3], split[3]));
-                } else {
-                    figFam_locus_177.put(split[0], patric_refseq.getOrDefault(split[3], split[3]));
+                if (Integer.parseInt(split[3].split("_")[1]) < 2159) {
+                    if (figFam_locus_177.containsKey(split[0])) {
+                        figFam_locus_177.put(split[0], figFam_locus_177.get(split[0]) + "," + patric_refseq.getOrDefault(split[3], split[3]));
+                    } else {
+                        figFam_locus_177.put(split[0], patric_refseq.getOrDefault(split[3], split[3]));
+                    }
                 }
             } else if (split[3].contains("77120")) {//Q154
                 if (figFam_locus_154.containsKey(split[0])) {

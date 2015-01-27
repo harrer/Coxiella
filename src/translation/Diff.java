@@ -16,6 +16,17 @@ public class Diff {
         return sb.append('\n').append(b).toString();
     }
     
+    public static double matchingRatio(String a, String b){
+        double matching = 0;
+        int length = Math.min(a.length(),b.length());
+        for (int i = 0; i < length; i++) {
+            if(a.charAt(i) == b.charAt(i)){
+                matching++;
+            }
+        }
+        return matching/length;
+    }
+    
     public static void main(String[] args) {
         String a = "MEAQSSHQAPLSPKGSLGLFRGYISILRELFTILSEWCSPTTMWMGLVLPGIFINLLSLAFPLILLQVYDRVIPQQSIYTLTFLIVGGIIVTGIAMVLSILRSVSINWTSARFEYFTHLRVFQRLLACKLDDFQKEGSGYY";
         String b = "MEAQSSHQAPLSPKGSLGLFRGYINILRELFTILSEWCSPTTMWMGLVLPGIFINLLSLAFPLILLQVYDRVIPQQSIYTLTFLIVGGIIVTGIAMVLSILRSVSINWTSARFEYFTHLRVFQRLLACKLDDFQKEGSG";

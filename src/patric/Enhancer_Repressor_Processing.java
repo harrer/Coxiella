@@ -11,12 +11,12 @@ import java.io.PrintWriter;
  */
 public class Enhancer_Repressor_Processing {
     
-    private int[] lineToInt(String line){
+    private static int[] lineToInt(String line){
         String [] prot = line.split("\t")[5].split(" ")[1].split("\\(")[1].split("\\)")[0].split("\\|");
         return new int[]{Integer.parseInt(prot[0]), Integer.parseInt(prot[1]), Integer.parseInt(prot[2])};
     }
     
-    public void processFile(String file, String outPath, boolean ommit_noFun) throws IOException{
+    public static void processFile(String file, String outPath, boolean ommit_noFun) throws IOException{
         BufferedReader br = new BufferedReader(new FileReader(file));
         br.readLine();
         StringBuilder enhancer = new StringBuilder("FigFam\tQ177|Q154|RSA_493\tPatric Locus tags Q177 (107188_...)\tQ154 (77120_...)\tRSA_493 (82552_...)\tnumber of proteins\tortholog\tfunction\n");
@@ -60,6 +60,6 @@ public class Enhancer_Repressor_Processing {
     
     public static void main(String[] args) throws IOException {
         String dir = "/home/tobias/Desktop/";
-        new Enhancer_Repressor_Processing().processFile(dir+"figfam_genomes.csv", dir, true);
+        Enhancer_Repressor_Processing.processFile(dir+"figfam_genomes.csv", dir, true);
     }
 }

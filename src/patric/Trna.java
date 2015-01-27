@@ -41,11 +41,6 @@ public class Trna {
         codon_pairs.put('C', 'G');
     }
 
-    private enum Strain {
-
-        rsa493, Q177, Q154
-    }
-
     private void readCodonUsage(String path, Strain strain) throws IOException {
         BufferedReader br = new BufferedReader(new FileReader(path + strain.toString() + ".txt"));
         String line;

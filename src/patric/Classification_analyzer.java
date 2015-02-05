@@ -78,23 +78,30 @@ public class Classification_analyzer {
         return fams.toArray(new FIGFam[]{});
     }
     
-    private static FIGFam[] find_equal_orthologues(FIGFam[] figfams, Strain[] strains, double ratioThreshold){
-        ArrayList<FIGFam> fams = new ArrayList<>();
+    private static FIGFam[] find_orthologues(FIGFam[] figfams, Strain[] strains, double ratioThreshold, boolean equals){
+        ArrayList<FIGFam> eqFams = new ArrayList<>();
+        ArrayList<FIGFam> uneqFams = new ArrayList<>();
         int equal = 0, total = 0;
         for (FIGFam fam : figfams) {
-            //total++;
+            total++;
             if(fam.hasExactly_n_ProteinsPerMember(1)){
-                total++;
+                //total++;
                 String p1 = fam.getMembers().get(strains[0]).toArray(new String[]{})[0];
                 String p2 = fam.getMembers().get(strains[1]).toArray(new String[]{})[0];
                 if(Diff.matchingRatio(proteome.get(p1), proteome.get(p2)) >= ratioThreshold){
                     equal++;
-                    fams.add(fam);
+                    eqFams.add(fam);
                 }
+                else{
+                    uneqFams.add(fam);
+                }
+            }
+            else{
+                uneqFams.add(fam);
             }
         }
         System.out.println("eq:"+equal+"\ntotal: "+total);
-        return fams.toArray(new FIGFam[]{});
+        return equals? eqFams.toArray(new FIGFam[]{}) : uneqFams.toArray(new FIGFam[]{});
     }
     
     public static void main(String[] args) throws IOException {
@@ -103,7 +110,9 @@ public class Classification_analyzer {
         FIGFam[] allFams = process_FigFam(path+"ProteinFamilyFeatures.txt");
         Strain[] strains = new Strain[]{Strain.Q177, Strain.Q154};
         FIGFam[] specificFams = find_specific_families(allFams, strains);
-        FIGFam[] equalFams = find_equal_orthologues(specificFams, strains, 1);
-        System.out.println("");
+        FIGFam[] equalFams = find_orthologues(specificFams, strains, 1, false);//false means unequal
+        for (FIGFam equalFam : equalFams) {
+            System.out.println(equalFam.getId());
+        }
     }
 }

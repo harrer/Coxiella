@@ -158,6 +158,7 @@ public class Translate {
     }
     
     public String translation (String mRNA) {
+        mRNA = mRNA.replaceAll("\n", "");
         mRNA = to_mRNA(mRNA);
         StringBuilder pr = new StringBuilder();
         for (int i = 0; i < 3; i++) {

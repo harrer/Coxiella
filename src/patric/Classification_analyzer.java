@@ -111,7 +111,7 @@ public class Classification_analyzer {
         //Strain[] strains = new Strain[]{Strain.Q177, Strain.Q154};
         Strain[] strains = new Strain[]{Strain.Q154, Strain.rsa493};
         FIGFam[] specificFams = find_specific_families(allFams, strains);
-        FIGFam[] equalFams = find_orthologues(specificFams, strains, 1, false);//false means unequal
+        FIGFam[] equalFams = find_orthologues(specificFams, strains, .1, false);//false means unequal
         for (FIGFam equalFam : equalFams) {
             System.out.println(equalFam.getId());
         }

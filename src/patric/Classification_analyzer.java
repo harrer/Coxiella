@@ -88,12 +88,22 @@ public class Classification_analyzer {
                 //total++;
                 String p1 = fam.getMembers().get(strains[0]).toArray(new String[]{})[0];
                 String p2 = fam.getMembers().get(strains[1]).toArray(new String[]{})[0];
-                if(Diff.matchingRatio(proteome.get(p1), proteome.get(p2)) >= ratioThreshold){
-                    equal++;
-                    eqFams.add(fam);
-                }
-                else{
-                    uneqFams.add(fam);
+                if (strains.length < 3) {
+                    if (Diff.matchingRatio(proteome.get(p1), proteome.get(p2)) >= ratioThreshold) {
+                        equal++;
+                        eqFams.add(fam);
+                    } else {
+                        uneqFams.add(fam);
+                    }
+                } else {
+                    String p3 = fam.getMembers().get(strains[2]).toArray(new String[]{})[0];
+                    if ((Diff.matchingRatio(proteome.get(p1), proteome.get(p2)) >= ratioThreshold) && (Diff.matchingRatio(proteome.get(p1), proteome.get(p3)) >= ratioThreshold) && (Diff.matchingRatio(proteome.get(p2), proteome.get(p3)) >= ratioThreshold)) {
+                        equal++;
+                        eqFams.add(fam);
+                    }
+                    else {
+                        uneqFams.add(fam);
+                    }
                 }
             }
             else{
@@ -109,7 +119,7 @@ public class Classification_analyzer {
         read_proteome(path+"proteome/");
         FIGFam[] allFams = process_FigFam(path+"ProteinFamilyFeatures.txt");
         //Strain[] strains = new Strain[]{Strain.Q177, Strain.Q154};
-        Strain[] strains = new Strain[]{Strain.Q154, Strain.rsa493};
+        Strain[] strains = Strain.values();//test with all starins!
         FIGFam[] specificFams = find_specific_families(allFams, strains);
         FIGFam[] equalFams = find_orthologues(specificFams, strains, .1, false);//false means unequal
         for (FIGFam equalFam : equalFams) {

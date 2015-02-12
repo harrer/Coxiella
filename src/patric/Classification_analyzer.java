@@ -81,11 +81,11 @@ public class Classification_analyzer {
     private static FIGFam[] find_orthologues(FIGFam[] figfams, Strain[] strains, double ratioThreshold, boolean equals){
         ArrayList<FIGFam> eqFams = new ArrayList<>();
         ArrayList<FIGFam> uneqFams = new ArrayList<>();
-        int equal = 0, total = 0;
+        int equal = 0, total = 0, exactly_one_perStrain = 0;
         for (FIGFam fam : figfams) {
             total++;
             if(fam.hasExactly_n_ProteinsPerMember(1)){
-                //total++;
+                exactly_one_perStrain++;
                 String p1 = fam.getMembers().get(strains[0]).toArray(new String[]{})[0];
                 String p2 = fam.getMembers().get(strains[1]).toArray(new String[]{})[0];
                 if (strains.length < 3) {
@@ -110,18 +110,18 @@ public class Classification_analyzer {
                 uneqFams.add(fam);
             }
         }
-        System.out.println("eq:"+equal+"\ntotal: "+total);
+        System.out.println("eq:"+equal+"\ntotal: "+total+" ("+exactly_one_perStrain+" with 1 protein per strain)");
         return equals? eqFams.toArray(new FIGFam[]{}) : uneqFams.toArray(new FIGFam[]{});
     }
     
     public static void main(String[] args) throws IOException {
-        String path = "/home/tobias/Dropbox/UNI/BACHELOR/Daten_Ergebnisse/";
+        String path = "/home/h/harrert/Dropbox/UNI/BACHELOR/Daten_Ergebnisse/";//"/home/tobias/Dropbox/UNI/BACHELOR/Daten_Ergebnisse/";
         read_proteome(path+"proteome/");
         FIGFam[] allFams = process_FigFam(path+"ProteinFamilyFeatures.txt");
         //Strain[] strains = new Strain[]{Strain.Q177, Strain.Q154};
         Strain[] strains = Strain.values();//test with all starins!
         FIGFam[] specificFams = find_specific_families(allFams, strains);
-        FIGFam[] equalFams = find_orthologues(specificFams, strains, .1, false);//false means unequal
+        FIGFam[] equalFams = find_orthologues(specificFams, strains, 0.97, false);//false means unequal
         for (FIGFam equalFam : equalFams) {
             System.out.println(equalFam.getId());
         }

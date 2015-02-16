@@ -3,8 +3,15 @@ package patric;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.util.AbstractSet;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
 import translation.Diff;
 
 /**
@@ -12,30 +19,28 @@ import translation.Diff;
  * @author tobias
  */
 public class Classification_analyzer {
-    
+
     private static final HashMap<String, String> proteome = new HashMap<>();
-    
-    private static void read_proteome(String path) throws IOException{
+
+    private static void read_proteome(String path) throws IOException {
         for (Strain strain : Strain.values()) {
-            BufferedReader br = new BufferedReader(new FileReader(path+strain+".PATRIC.faa"));
-            String line, header="";
+            BufferedReader br = new BufferedReader(new FileReader(path + strain + ".PATRIC.faa"));
+            String line, header = "";
             StringBuilder sb = new StringBuilder();
-            while ((line = br.readLine()) !=null) {                
-                if(line.startsWith(">")){
+            while ((line = br.readLine()) != null) {
+                if (line.startsWith(">")) {
                     sb = new StringBuilder();
                     header = line.split("\\|")[3];
-                }
-                else if(!line.equals("")){
+                } else if (!line.equals("")) {
                     sb.append(line.trim());
-                }
-                else{
+                } else {
                     proteome.put(header, sb.toString());
                 }
             }
             br.close();
         }
     }
-    
+
     private static FIGFam[] process_FigFam(String file) throws IOException {
         BufferedReader br = new BufferedReader(new FileReader(file));
         HashMap<String, FIGFam> fams = new HashMap<>();
@@ -55,36 +60,36 @@ public class Classification_analyzer {
             }
             fams.put(split[0], fam);
             /* boolean[] genomes = (group_genome.containsKey(split[0])) ? group_genome.get(split[0]) : new boolean[3];//bit vector genomes: 0: Q177, 1: Q154, 2: RSA 493
-            if (split[1].equalsIgnoreCase("Coxiella burnetii 'MSU Goat Q177'")) {
-            genomes[0] = true;
-            } else if (split[1].equalsIgnoreCase("Coxiella burnetii CbuK_Q154")) {
-            genomes[1] = true;
-            } else if (split[1].equalsIgnoreCase("Coxiella burnetii RSA 493")) {
-            genomes[2] = true;
-            }
-            group_genome.put(split[0], genomes);*/
+             if (split[1].equalsIgnoreCase("Coxiella burnetii 'MSU Goat Q177'")) {
+             genomes[0] = true;
+             } else if (split[1].equalsIgnoreCase("Coxiella burnetii CbuK_Q154")) {
+             genomes[1] = true;
+             } else if (split[1].equalsIgnoreCase("Coxiella burnetii RSA 493")) {
+             genomes[2] = true;
+             }
+             group_genome.put(split[0], genomes);*/
         }
         br.close();
         return fams.values().toArray(new FIGFam[]{});
     }
-    
-    private static FIGFam[] find_specific_families(FIGFam[] figfams, Strain[] strains){
+
+    private static FIGFam[] find_specific_families(FIGFam[] figfams, Strain[] strains) {
         ArrayList<FIGFam> fams = new ArrayList<>();
         for (FIGFam fam : figfams) {
-            if(fam.hasStrain(strains, true)){
+            if (fam.hasStrain(strains, true)) {
                 fams.add(fam);
             }
         }
         return fams.toArray(new FIGFam[]{});
     }
-    
-    private static FIGFam[] find_orthologues(FIGFam[] figfams, Strain[] strains, double ratioThreshold, boolean equals){
+
+    private static FIGFam[] find_orthologues(FIGFam[] figfams, Strain[] strains, double ratioThreshold, boolean equals) {
         ArrayList<FIGFam> eqFams = new ArrayList<>();
         ArrayList<FIGFam> uneqFams = new ArrayList<>();
         int equal = 0, total = 0, exactly_one_perStrain = 0;
         for (FIGFam fam : figfams) {
             total++;
-            if(fam.hasExactly_n_ProteinsPerMember(1)){
+            if (fam.hasExactly_n_ProteinsPerMember(1)) {
                 exactly_one_perStrain++;
                 String p1 = fam.getMembers().get(strains[0]).toArray(new String[]{})[0];
                 String p2 = fam.getMembers().get(strains[1]).toArray(new String[]{})[0];
@@ -100,29 +105,67 @@ public class Classification_analyzer {
                     if ((Diff.matchingRatio(proteome.get(p1), proteome.get(p2)) >= ratioThreshold) && (Diff.matchingRatio(proteome.get(p1), proteome.get(p3)) >= ratioThreshold) && (Diff.matchingRatio(proteome.get(p2), proteome.get(p3)) >= ratioThreshold)) {
                         equal++;
                         eqFams.add(fam);
-                    }
-                    else {
+                    } else {
                         uneqFams.add(fam);
                     }
                 }
-            }
-            else{
+            } else {
                 uneqFams.add(fam);
             }
         }
-        System.out.println("eq:"+equal+"\ntotal: "+total+" ("+exactly_one_perStrain+" with 1 protein per strain)");
-        return equals? eqFams.toArray(new FIGFam[]{}) : uneqFams.toArray(new FIGFam[]{});
+        System.out.println("eq:" + equal + "\ntotal: " + total + " (" + exactly_one_perStrain + " with 1 protein per strain)");
+        return equals ? eqFams.toArray(new FIGFam[]{}) : uneqFams.toArray(new FIGFam[]{});
     }
-    
-    public static void main(String[] args) throws IOException {
-        String path = "/home/h/harrert/Dropbox/UNI/BACHELOR/Daten_Ergebnisse/";//"/home/tobias/Dropbox/UNI/BACHELOR/Daten_Ergebnisse/";
-        read_proteome(path+"proteome/");
-        FIGFam[] allFams = process_FigFam(path+"ProteinFamilyFeatures.txt");
+
+    public static void mafft(FIGFam[] fams) throws IOException, InterruptedException {
+        String[] sa = new String[]{"/home/tobias/mafft/bin/mafft", "--clustalout", "/tmp/test.fa"};
+        int cnt = 0;
+        for (int i = 0; i < fams.length; i++) {
+            if(fams[i].getId().matches("FIG01306568|FIG00638284") || !fams[i].hasExactly_n_ProteinsPerMember(1)){continue;}
+            PrintWriter pw = new PrintWriter("/tmp/test.fa");
+            int length = 0;
+            for (Map.Entry<Strain, HashSet<String>> entrySet : fams[i].getMembers().entrySet()) {
+                HashSet<String> value = entrySet.getValue();
+                for (String next : value) {
+                    pw.write('>' + next + '\n');
+                    pw.write(proteome.get(next) + "\n\n");
+                    length = proteome.get(next).length() > length ? proteome.get(next).length() : length;
+                }
+            }
+            pw.close();
+            System.out.println("Run " + i + " with " + fams[i].getId() + ":");
+            Process p = Runtime.getRuntime().exec(sa);
+            p.waitFor();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            StringBuilder sb = new StringBuilder().append('\n');
+            String line;
+            double count = 0;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line).append('\n');
+                for (char c : line.toCharArray()) {
+                    if(c == '*'){count++;}
+                }
+            }
+            if(count/length < 0.8){
+                cnt++;
+                System.out.println(sb.toString());
+            }
+            System.out.println("---");
+            reader.close();
+        }
+        System.out.println(cnt+" < 0.8");
+    }
+
+    public static void main(String[] args) throws IOException, InterruptedException {
+        String path = "/home/tobias/Dropbox/UNI/BACHELOR/Daten_Ergebnisse/";//"/home/h/harrert/Dropbox/UNI/BACHELOR/Daten_Ergebnisse/"
+        read_proteome(path + "proteome/");
+        FIGFam[] allFams = process_FigFam(path + "ProteinFamilyFeatures.txt");
         //Strain[] strains = new Strain[]{Strain.Q177, Strain.Q154};
         Strain[] strains = Strain.values();//test with all starins!
         FIGFam[] specificFams = find_specific_families(allFams, strains);
-        FIGFam[] equalFams = find_orthologues(specificFams, strains, 0.97, false);//false means unequal
-        for (FIGFam equalFam : equalFams) {
+        FIGFam[] un_equalFams = find_orthologues(specificFams, strains, 0.98, false);//false means unequal
+        mafft(un_equalFams);
+        for (FIGFam equalFam : un_equalFams) {
             System.out.println(equalFam.getId());
         }
     }

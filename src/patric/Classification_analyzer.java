@@ -5,12 +5,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.util.AbstractSet;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import translation.Diff;
 
@@ -48,7 +45,7 @@ public class Classification_analyzer {
         br.readLine();
         while ((line = br.readLine()) != null && !line.equals("")) {
             String[] split = line.split("\t");//0: Group, 1:Genome , 3:Locus
-            FIGFam fam = fams.containsKey(split[0]) ? fams.get(split[0]) : new FIGFam(split[0]);
+            FIGFam fam = fams.containsKey(split[0]) ? fams.get(split[0]) : new FIGFam(split[0], split[10]);
             if (split[3].contains("82552")) {//RSA_493
                 fam.addMember(split[3], Strain.rsa493);
             } else if (split[3].contains("107188")) {//Q177
@@ -118,10 +115,10 @@ public class Classification_analyzer {
     }
 
     public static void mafft(FIGFam[] fams) throws IOException, InterruptedException {
-        String[] sa = new String[]{"/home/tobias/mafft/bin/mafft", "--clustalout", "/tmp/test.fa"};
+        String[] sa = new String[]{"/home/tobias/mafft/bin/mafft", "--auto", "/tmp/test.fa"};
         int cnt = 0;
         for (int i = 0; i < fams.length; i++) {
-            if(fams[i].getId().matches("FIG01306568|FIG00638284") || !fams[i].hasExactly_n_ProteinsPerMember(1)){continue;}
+            if(fams[i].getId().matches("FIG01306568|FIG00638284") || fams[i].hasExactly_n_ProteinsPerMember(1) || fams[i].getFunction().contains("ypothetical")){continue;}
             PrintWriter pw = new PrintWriter("/tmp/test.fa");
             int length = 0;
             for (Map.Entry<Strain, HashSet<String>> entrySet : fams[i].getMembers().entrySet()) {
@@ -133,7 +130,7 @@ public class Classification_analyzer {
                 }
             }
             pw.close();
-            System.out.println("Run " + i + " with " + fams[i].getId() + ":");
+            System.out.println("Run " + i + " with " + fams[i].getId() + ": "+fams[i].getFunction());
             Process p = Runtime.getRuntime().exec(sa);
             p.waitFor();
             BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
@@ -141,7 +138,12 @@ public class Classification_analyzer {
             String line;
             double count = 0;
             while ((line = reader.readLine()) != null) {
-                sb.append(line).append('\n');
+                if(line.startsWith(">")){
+                    sb.append("%%%").append(line).append("%%%\n");
+                }
+                else{
+                    sb.append(line).append('\n');
+                }
                 for (char c : line.toCharArray()) {
                     if(c == '*'){count++;}
                 }
@@ -165,8 +167,8 @@ public class Classification_analyzer {
         FIGFam[] specificFams = find_specific_families(allFams, strains);
         FIGFam[] un_equalFams = find_orthologues(specificFams, strains, 0.98, false);//false means unequal
         mafft(un_equalFams);
-        for (FIGFam equalFam : un_equalFams) {
-            System.out.println(equalFam.getId());
-        }
+        /*for (FIGFam equalFam : un_equalFams) {
+        System.out.println(equalFam.getId());
+        }*/
     }
 }

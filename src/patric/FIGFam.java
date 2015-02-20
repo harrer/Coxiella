@@ -11,15 +11,20 @@ import java.util.Map;
  */
 public class FIGFam {
     
-    private final String id;
+    private final String id, function;
     private final HashMap<Strain, HashSet<String>> members = new HashMap<>();
 
-    public FIGFam(String id) {
+    public FIGFam(String id, String function) {
         this.id = id;
+        this.function = function;
     }
 
     public String getId() {
         return id;
+    }
+
+    public String getFunction() {
+        return function;
     }
 
     public HashMap<Strain, HashSet<String>> getMembers() {

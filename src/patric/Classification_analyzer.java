@@ -118,7 +118,7 @@ public class Classification_analyzer {
     public static void mafft(FIGFam[] fams) throws IOException, InterruptedException {
         int cnt = 0;
         for (int i = 0; i < fams.length; i++) {
-            if (fams[i].getId().matches("FIG01306568|FIG00638284") || fams[i].hasExactly_n_ProteinsPerMember(1) || fams[i].getFunction().contains("ypothetical")) {continue;}
+            if (fams[i].getId().matches("FIG01306568|FIG00638284") || !fams[i].hasExactly_n_ProteinsPerMember(1) || fams[i].getFunction().contains("ypothetical")) {continue;}
             PrintWriter pw = new PrintWriter("/tmp/test.fa");
             int length = 0;
             ArrayList<String> seq = new ArrayList<>();
@@ -135,72 +135,20 @@ public class Classification_analyzer {
             if (fams[i].hasExactly_n_ProteinsPerMember(1) && lcs_ratio(seq, length) < 0.8) {
                 cnt = printRun(i, fams[i], length, cnt);
             }
-            else if(!fams[i].hasExactly_n_ProteinsPerMember(1) && !lcs_moreThanOne_perFam_2(seq)){
+            else if(!fams[i].hasExactly_n_ProteinsPerMember(1) && !lcs_moreThanOne_perFam(seq)){
                 cnt = printRun(i, fams[i], length, cnt);
             }
         }
         System.out.println(cnt + " < 0.8");
     }
     
-    private static boolean lcs_moreThanOne_perFam_2(ArrayList<String> seq){
-        ArrayList<HashSet<Integer>> clusters = new ArrayList<>();// stores which sequence pairs are parallogous
-        for (int i = 0; i < seq.size(); i++) {
-            for (int j = 0; j < seq.size(); j++) {
-                if (j > i) {
-                    String a = seq.get(i);
-                    String b = seq.get(j);
-                    String s = LCS.backtrack(LCS.fillMatrix(a, b), a, b, a.length(), b.length());
-                    double lcs_ratio = 1.0 * s.length() / Math.max(a.length(), b.length());
-                    if(lcs_ratio > 0.8){
-                        boolean new_cluster = true;
-                        for (HashSet<Integer> cluster : clusters) {
-                            if(cluster.contains(i) || cluster.contains(j)){
-                                new_cluster = false;
-                                cluster.add(i);
-                                cluster.add(j);
-                            }
-                        }
-                        if(new_cluster){
-                                HashSet<Integer> set = new HashSet<>();
-                                set.add(i);
-                                set.add(j);
-                                clusters.add(set);
-                            }
-                    }
-                }
-            }
-        }
-        int members = -1;
-        for (HashSet<Integer> cluster : clusters) {
-            if(members == -1){
-                members = cluster.size();
-            }
-            else if(members != cluster.size()){
-                return false;
-            }
-        }
-        return true;
-    }
-    
     private static boolean lcs_moreThanOne_perFam(ArrayList<String> seq){
-        ArrayList<String> lcs = new ArrayList<>(); //stores the longest common subsequences for each sequence pair
-        HashMap<Integer, int[]> map = new HashMap<>();//stores the index of each sequence pair (i,j) in lcs
+        ArrayList<HashSet<Integer>> clusters = new ArrayList<>();// stores which sequence pairs are parallogous
         for (int i = 0; i < seq.size(); i++) {
             for (int j = 0; j < seq.size(); j++) {
                 if (j > i) {
                     String a = seq.get(i);
                     String b = seq.get(j);
-                    lcs.add(LCS.backtrack(LCS.fillMatrix(a, b), a, b, a.length(), b.length()));
-                    map.put(lcs.size()-1, new int[]{i,j});
-                }
-            }
-        }
-        ArrayList<HashSet<Integer>> clusters = new ArrayList<>();// stores which sequence pairs are parallogous
-        for (int i = 0; i < lcs.size(); i++) {
-            for (int j = 0; j < lcs.size(); j++) {
-                if(j > i){
-                    String a = lcs.get(i);
-                    String b = lcs.get(j);
                     String s = LCS.backtrack(LCS.fillMatrix(a, b), a, b, a.length(), b.length());
                     double lcs_ratio = 1.0 * s.length() / Math.max(a.length(), b.length());
                     if(lcs_ratio > 0.8){

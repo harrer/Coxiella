@@ -6,9 +6,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.function.Consumer;
 import translation.Diff;
 import lcs.LCS;
 
@@ -19,6 +21,7 @@ import lcs.LCS;
 public class Classification_analyzer {
 
     private static final HashMap<String, String> proteome = new HashMap<>();
+    private static final HashMap<String, ArrayList<String>> seqMap = new HashMap<>();
 
     private static void read_proteome(String path) throws IOException {
         for (Strain strain : Strain.values()) {
@@ -118,22 +121,27 @@ public class Classification_analyzer {
     public static void mafft(FIGFam[] fams) throws IOException, InterruptedException {
         int cnt = 0;
         for (int i = 0; i < fams.length; i++) {
-            if (fams[i].getId().matches("FIG01306568|FIG00638284") || !fams[i].hasExactly_n_ProteinsPerMember(1) || fams[i].getFunction().contains("ypothetical")) {continue;}
+            if (fams[i].getId().matches("FIG01306568|FIG00638284") || fams[i].hasExactly_n_ProteinsPerMember(1) || fams[i].getFunction().contains("ypothetical")) {continue;}
             PrintWriter pw = new PrintWriter("/tmp/test.fa");
             int length = 0;
             ArrayList<String> seq = new ArrayList<>();
+            seqMap.put(fams [i].getId(), new ArrayList<String>());
             for (Map.Entry<Strain, HashSet<String>> entrySet : fams[i].getMembers().entrySet()) {
                 HashSet<String> value = entrySet.getValue();
                 for (String next : value) {
                     pw.write('>' + next + '\n');
                     seq.add(proteome.get(next));
+                    seqMap.get(fams[i].getId()).add(next);
                     pw.write(proteome.get(next) + "\n\n");
                     length = Math.max(proteome.get(next).length(), length);//proteome.get(next).length() > length ? proteome.get(next).length() : length;
                 }
             }
             pw.close();
+            if(fams[i].getId().equalsIgnoreCase("FIG01366623")){
+                    System.out.println("");
+                }
             if (fams[i].hasExactly_n_ProteinsPerMember(1) && lcs_ratio(seq, length) < 0.8) {
-                cnt = printRun(i, fams[i], length, cnt);
+                cnt = printRun_1_perFam(i, fams[i], length, cnt);
             }
             else if(!fams[i].hasExactly_n_ProteinsPerMember(1) && !lcs_moreThanOne_perFam(seq)){
                 cnt = printRun(i, fams[i], length, cnt);
@@ -142,8 +150,15 @@ public class Classification_analyzer {
         System.out.println(cnt + " < 0.8");
     }
     
+    private static ArrayList<Integer> clustersList = new ArrayList<>();// stores which sequence pairs are parallogous
+    
     private static boolean lcs_moreThanOne_perFam(ArrayList<String> seq){
         ArrayList<HashSet<Integer>> clusters = new ArrayList<>();// stores which sequence pairs are parallogous
+        clustersList = new ArrayList<>();
+        HashSet<Integer> completeSet = new HashSet<>(), emptySet = new HashSet<>();
+        for (int i = 0; i < seq.size(); i++) {
+            completeSet.add(i);
+        }
         for (int i = 0; i < seq.size(); i++) {
             for (int j = 0; j < seq.size(); j++) {
                 if (j > i) {
@@ -156,19 +171,31 @@ public class Classification_analyzer {
                         for (HashSet<Integer> cluster : clusters) {
                             if(cluster.contains(i) || cluster.contains(j)){
                                 new_cluster = false;
+                                emptySet.add(i);
+                                emptySet.add(j);
                                 cluster.add(i);
                                 cluster.add(j);
+                                if(!clustersList.contains(i)){clustersList.add(i);}
+                                if(!clustersList.contains(j)){clustersList.add(j);}
                             }
                         }
                         if(new_cluster){
                                 HashSet<Integer> set = new HashSet<>();
                                 set.add(i);
                                 set.add(j);
+                                emptySet.add(i);
+                                emptySet.add(j);
                                 clusters.add(set);
+                                if(!clustersList.contains(i)){clustersList.add(i);}
+                                if(!clustersList.contains(j)){clustersList.add(j);}
                             }
                     }
                 }
             }
+        }
+        completeSet.removeAll(emptySet);
+        for (Integer c : completeSet) {
+            clustersList.add(c);
         }
         int members = -1;
         for (HashSet<Integer> cluster : clusters) {
@@ -197,6 +224,7 @@ public class Classification_analyzer {
     }
 
     private static int printRun(int i, FIGFam fam, int length, int cnt) throws IOException, InterruptedException {
+        HashMap<String, StringBuilder> alignments = new HashMap<>();
         String[] sa = new String[]{"/home/tobias/mafft/bin/mafft", "--auto", "/tmp/test.fa"};
         System.out.println("Run " + i + " with " + fam.getId() + ": " + fam.getFunction());
         Process p = Runtime.getRuntime().exec(sa);
@@ -204,24 +232,43 @@ public class Classification_analyzer {
         BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
         StringBuilder sb = new StringBuilder().append('\n');
         String line;
-        double count = 0;
+        String id = "";
         while ((line = reader.readLine()) != null) {
             if (line.startsWith(">")) {
-                sb.append("%%%").append(line).append("%%%\n");
+                id = line.substring(1, line.length());
+                alignments.put(id, new StringBuilder());
             } else {
-                sb.append(line).append('\n');
-            }
-            for (char c : line.toCharArray()) {
-                if (c == '*') {
-                    count++;
-                }
+                alignments.get(id).append(line.trim());
             }
         }
-        if (count / length < 0.8) {
-            cnt++;
-            System.out.println(sb.toString());
+        cnt++;
+        for (Integer c : clustersList) {
+            sb.append('>').append(seqMap.get(fam.getId()).get(c)).append('\n');
+            sb.append(alignments.get(seqMap.get(fam.getId()).get(c))).append('\n');
         }
-        System.out.println("---");
+        sb.append("\n---\n");
+        System.out.println(sb.toString());
+        reader.close();
+        return cnt;
+    }
+    
+    private static int printRun_1_perFam(int i, FIGFam fam, int length, int cnt) throws IOException, InterruptedException {
+        String[] sa = new String[]{"/home/tobias/mafft/bin/mafft", "--auto", "/tmp/test.fa"};
+        System.out.println("Run " + i + " with " + fam.getId() + ": " + fam.getFunction());
+        Process p = Runtime.getRuntime().exec(sa);
+        p.waitFor();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+        StringBuilder sb = new StringBuilder().append('\n');
+        String line;
+        while ((line = reader.readLine()) != null) {
+            if (line.startsWith(">")) {
+                sb.append('\n').append(line).append('\n');
+            } else {
+                sb.append(line.trim());
+            }
+        }
+        cnt++;
+        System.out.println(sb.append("\n\n---\n\n").toString());
         reader.close();
         return cnt;
     }

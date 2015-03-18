@@ -137,9 +137,6 @@ public class Classification_analyzer {
                 }
             }
             pw.close();
-            if(fams[i].getId().equalsIgnoreCase("FIG01366623")){
-                    System.out.println("");
-                }
             if (fams[i].hasExactly_n_ProteinsPerMember(1) && lcs_ratio(seq, length) < 0.8) {
                 cnt = printRun_1_perFam(i, fams[i], length, cnt);
             }
@@ -277,7 +274,6 @@ public class Classification_analyzer {
         String path = "/home/tobias/Dropbox/UNI/BACHELOR/Daten_Ergebnisse/";//"/home/h/harrert/Dropbox/UNI/BACHELOR/Daten_Ergebnisse/"
         read_proteome(path + "proteome/");
         FIGFam[] allFams = process_FigFam(path + "ProteinFamilyFeatures.txt");
-        //Strain[] strains = new Strain[]{Strain.Q177, Strain.Q154};
         Strain[] strains = Strain.values();//test with all starins!
         FIGFam[] specificFams = find_specific_families(allFams, strains);
         FIGFam[] un_equalFams = find_orthologues(specificFams, strains, 0.98, false);//false means unequal
